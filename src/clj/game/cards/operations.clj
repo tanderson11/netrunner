@@ -293,7 +293,7 @@
 
 (define-card "Biotic Labor"
   {:msg "gain [Click][Click]"
-   :effect (effect (gain :click 2))})
+  :effect (effect (gain :click 2))})
 
 (define-card "Blue Level Clearance"
   {:msg "gain 5 [Credits] and draw 2 cards"
@@ -1458,14 +1458,15 @@
 
 (define-card "Precognition"
   {:async true
-   :msg "rearrange the top 5 cards of R&D"
+   :msg "rearrange the top 5 cards of R&D and gain [click]"
    :effect (req (show-wait-prompt state :runner "Corp to rearrange the top cards of R&D")
                 (let [from (take 5 (:deck corp))]
                   (if (pos? (count from))
                     (continue-ability state side (reorder-choice :corp :runner from '()
                                                                  (count from) from) card nil)
                     (do (clear-wait-prompt state :runner)
-                        (effect-completed state side eid)))))})
+                        (effect-completed state side eid))))
+                (gain state side :click 1))})
 
 (define-card "Predictive Algorithm"
   {:events [{:event :pre-steal-cost
@@ -1729,24 +1730,12 @@
   {:async true
    :prompt "Choose one:"
    :choices ["Purge virus counters"
-             "Gain 2 [Credits]"]
-   :effect (req (if (= target "Gain 2 [Credits]")
-                  (do (gain-credits state side 2)
-                      (system-msg state side "uses Reverse Infection to gain 2 [Credits]")
+             "Gain 3 [Credits]"]
+   :effect (req (if (= target "Gain 3 [Credits]")
+                  (do (gain-credits state side 3)
+                      (system-msg state side "uses Reverse Infection to gain 3 [Credits]")
                       (effect-completed state side eid))
-                  (let [pre-purge-virus (number-of-virus-counters state)]
-                    (purge state side)
-                    (let [post-purge-virus (number-of-virus-counters state)
-                          num-virus-purged (- pre-purge-virus post-purge-virus)
-                          num-to-trash (quot num-virus-purged 3)]
-                      (wait-for (mill state :corp :runner num-to-trash)
-                                (system-msg state side
-                                            (str "uses Reverse Infection to purge "
-                                                 (quantify num-virus-purged "virus counter")
-                                                 " and trash "
-                                                 (quantify num-to-trash "card")
-                                                 " from the top of the stack"))
-                                (effect-completed state side eid))))))})
+                  (purge state side)))})
 
 (define-card "Rework"
   {:prompt "Select a card from HQ to shuffle into R&D"
@@ -1903,11 +1892,11 @@
 (define-card "Shipment from Kaguya"
   {:choices {:max 2
              :card #(and (corp? %)
-                         (installed? %)
-                         (can-be-advanced? %))}
-   :msg (msg "place 1 advancement token on " (count targets) " cards")
-   :effect (req (doseq [t targets]
-                  (add-prop state :corp t :advance-counter 1 {:placed true})))})
+                         (installed? %))}
+   :msg (msg "place advancement tokens on " (count targets) " cards")
+   :effect (req (doseq [n (range (count targets))]
+                        (add-prop state :corp (nth targets n) :advance-counter (- 2 n) {:placed true})))})
+  
 
 (define-card "Shipment from MirrorMorph"
   (letfn [(shelper [n]

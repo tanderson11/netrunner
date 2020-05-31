@@ -450,32 +450,7 @@
                                     (seq (remove :broken (:subroutines target))))))]}))
 
 (define-card "Archangel"
-  {:flags {:rd-reveal (req true)}
-   :access
-   {:async true
-    :req (req (not (in-discard? card)))
-    :effect (effect (show-wait-prompt :runner "Corp to decide to trigger Archangel")
-                    (continue-ability
-                      {:optional
-                       {:prompt "Pay 3 [Credits] to force Runner to encounter Archangel?"
-                        :yes-ability
-                        {:cost [:credit 3]
-                         :async true
-                         :effect (effect (system-msg :corp "pays 3 [Credits] to force the Runner to encounter Archangel")
-                                         (clear-wait-prompt :runner)
-                                         (continue-ability
-                                           :runner
-                                           {:optional
-                                            {:player :runner
-                                             :prompt "You are encountering Archangel. Allow its subroutine to fire?"
-                                             :yes-ability {:async true
-                                                           :effect (effect (resolve-unbroken-subs! eid card))}
-                                             :no-ability {:effect (effect (effect-completed eid))}}}
-                                           card nil))}
-                        :no-ability {:effect (effect (system-msg :corp "declines to force the Runner to encounter Archangel")
-                                                     (clear-wait-prompt :runner))}}}
-                      card nil))}
-   :subroutines [(trace-ability 6 add-runner-card-to-grip)]})
+  {:subroutines [(trace-ability 6 add-runner-card-to-grip)]})
 
 (define-card "Archer"
   {:additional-cost [:forfeit]
@@ -1596,10 +1571,15 @@
                                (trash eid card {:cause :subroutine}))}]}))
 
 (define-card "Hudson 1.0"
-  (let [sub {:msg "prevent the Runner from accessing more than 1 card during this run"
-             :effect (effect (max-access 1))}]
-    {:subroutines [sub
-                   sub]
+  (let [sub1 {:msg "prevent the Runner from accessing more than 2 card during this run"
+              :effect (effect (max-access 2))}
+        sub2 {:msg "prevent the Runner from accessing more than 1 card during this run"
+              :effect (effect (max-access 1))}
+        sub3 {:msg "prevent the Runner from accessing cards during this run"
+         :effect (effect (prevent-access))}]
+    {:subroutines [sub1
+                   sub2
+                   sub3]
      :runner-abilities [(bioroid-break 1 1)]}))
 
 (define-card "Hunter"

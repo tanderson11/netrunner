@@ -435,7 +435,7 @@
              :effect (effect (gain-credits 1))}]})
 
 (define-card "Desperado"
-  {:in-play [:memory 1]
+  {:in-play [:memory 0]
    :events [{:event :successful-run
              :silent (req true)
              :msg "gain 1 [Credits]" :effect (effect (gain-credits 1))}]})

@@ -1094,9 +1094,16 @@
    :abilities [(set-autoresolve :auto-ctm "CtM")]})
 
 (define-card "NBN: Making News"
-  {:recurring 2
+  {:recurring 1
    :interactions {:pay-credits {:req (req (= :trace (:source-type eid)))
-                                :type :recurring}}})
+                                :type :recurring}}
+
+  :constant-effects [{:type :card-ability-additional-cost
+                       :req (req (let [targetcard (first targets)
+                                       target (second targets)]
+                                   (same-card? targetcard (:basic-action-card runner))
+                                   (= "Remove 1 tag" (:label target))))
+                       :value [:credit 1]}]})
 
 (define-card "NBN: The World is Yours*"
   {:effect (effect (gain :hand-size 1))

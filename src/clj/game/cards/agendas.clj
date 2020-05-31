@@ -60,9 +60,9 @@
                                           (do (unregister-events state side card)
                                               (trash-cards state side eid choices {:unpreventable true}))
                                           ;; There are still ice left
-                                          (seq (filter ice? choices))
-                                          (continue-ability
-                                            state side (abt titles choices) card nil)
+                                          ;;(seq (filter ice? choices))
+                                          ;;(continue-ability
+                                          ;;  state side (abt titles choices) card nil)
                                           ;; Trash what's left
                                           :else
                                           (do (unregister-events state side card)

@@ -642,16 +642,22 @@
                 :label "Rez a card at no cost" :msg (msg "rez " (:title target) " at no cost")
                 :effect (effect (rez target {:ignore-cost :all-costs}))}]})
 
+
 (define-card "Elizabeth Mills"
-  {:effect (effect (lose-bad-publicity 1))
-   :msg "remove 1 bad publicity"
-   :abilities [{:cost [:click 1 :trash]
-                :label "Trash a location"
-                :msg (msg "trash " (:title target) " and take 1 bad publicity")
-                :choices {:card #(has-subtype? % "Location")}
-                :async true
-                :effect (req (wait-for (trash state side target nil)
-                                       (gain-bad-publicity state :corp eid 1)))}]})
+  (let [ability {:msg "remove 1 bad publicity"
+                 :label "Remove 1 bad publicity (start of turn)"
+                 :once :per-turn
+                 :effect (effect (lose-bad-publicity 1))}]
+    {:derezzed-events [corp-rez-toast]
+     :events [(assoc ability :event :corp-turn-begins)]
+     :abilities [ability
+                 {:cost [:click 1 :trash]
+                  :label "Trash a location"
+                  :msg (msg "trash " (:title target) " and take 1 bad publicity")
+                  :choices {:card #(has-subtype? % "Location")}
+                  :async true
+                  :effect (req (wait-for (trash state side target nil)
+                                         (gain-bad-publicity state :corp eid 1)))}]}))
 
 (define-card "Encryption Protocol"
   {:constant-effects [{:type :trash-cost
